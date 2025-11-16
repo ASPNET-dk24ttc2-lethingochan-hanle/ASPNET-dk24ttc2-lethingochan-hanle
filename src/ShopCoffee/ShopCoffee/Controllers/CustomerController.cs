@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ShopCoffee.Database;
 using ShopCoffee.Helper;
 using ShopCoffee.Models;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace ShopCoffee.Controllers
 {
@@ -15,6 +17,21 @@ namespace ShopCoffee.Controllers
         public CustomerController(CoffeeShopContext context)
         {
             _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            int idCustomer = HttpContext.Session?.GetInt32("CustomerId") ?? 0;
+            if (idCustomer == 0) return RedirectToAction("Login", new { ReturnUrl = "/Customer/Profile" });
+
+            var customer = await _context.Customers
+                    .Include(p => p.Payments)
+                        .ThenInclude(p => p.PaymentDetails)
+                        .ThenInclude(p => p.Product)
+                    .FirstOrDefaultAsync(p => p.CustomerId == idCustomer);
+
+            return View(customer);
         }
 
         [HttpGet]
@@ -79,9 +96,29 @@ namespace ShopCoffee.Controllers
                 //if (customer.Role == 0)
                 //    return RedirectToAction("Index", "Admin"); // nếu là admin
                 //else
-                    return RedirectToAction("Index", "Product"); // nếu là user
+                return RedirectToAction("Index", "Product"); // nếu là user
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateDetailCustomer(Customer model, IFormFile? ImgUpload)
+        {
+            if (ImgUpload != null)
+            {
+                model.Img = await FileHelper.SaveImageAsync(ImgUpload, "customer");
+            }
+            else
+            {
+                model.Img ??= Url.Content("~/images/placeholder.png");
+            }
+
+            model.UpdateAt = DateTime.Now;
+            _context.Update(model);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Profile));
+        }
+
 
         // Đăng xuất
         public IActionResult Logout()

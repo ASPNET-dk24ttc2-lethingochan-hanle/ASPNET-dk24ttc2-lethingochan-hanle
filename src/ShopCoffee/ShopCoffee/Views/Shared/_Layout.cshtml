@@ -55,10 +55,8 @@
                     @{
                         if (@Context.Session?.GetInt32("CustomerId") != null)
                         {
-                            <a asp-area="Admin"
-                               asp-controller="CustomerAdmin"
-                               asp-action="Details"
-                               asp-route-id="Administrator"
+                            <a asp-controller="Customer"
+                               asp-action="Profile"
                                class="text-white">
                                 @Context.Session?.GetString("CustomerName")
                             </a>
