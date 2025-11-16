@@ -10,9 +10,9 @@ namespace ShopCoffee.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly ShopCoffeeContext _context;
+        private readonly CoffeeShopContext _context;
 
-        public CustomerController(ShopCoffeeContext context)
+        public CustomerController(CoffeeShopContext context)
         {
             _context = context;
         }
@@ -76,10 +76,10 @@ namespace ShopCoffee.Controllers
             }
             else
             {
-                if (customer.Role == 0)
-                    return RedirectToAction("Index", "Admin"); // nếu là admin
-                else
-                    return RedirectToAction("Index", "Home"); // nếu là user
+                //if (customer.Role == 0)
+                //    return RedirectToAction("Index", "Admin"); // nếu là admin
+                //else
+                    return RedirectToAction("Index", "Product"); // nếu là user
             }
         }
 

@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ShopCoffee.Database;
 
-public partial class ShopCoffeeContext : DbContext
+public partial class CoffeeShopContext : DbContext
 {
-    public ShopCoffeeContext()
+    public CoffeeShopContext()
     {
     }
 
-    public ShopCoffeeContext(DbContextOptions<ShopCoffeeContext> options)
+    public CoffeeShopContext(DbContextOptions<CoffeeShopContext> options)
         : base(options)
     {
     }
@@ -25,9 +25,9 @@ public partial class ShopCoffeeContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Coffee_Shop;Integrated Security=True;Trust Server Certificate=True");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Coffee_Shop;Integrated Security=True;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,22 +87,22 @@ public partial class ShopCoffeeContext : DbContext
 
         modelBuilder.Entity<PaymentDetail>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("paymentDetail");
+            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__7F4E342F9A4E0F42");
 
+            entity.ToTable("PaymentDetail");
+
+            entity.Property(e => e.PaymentDetailId).HasColumnName("PaymentDetailID");
             entity.Property(e => e.CreateAt).HasColumnType("datetime");
             entity.Property(e => e.PaymentId).HasColumnName("PaymentID");
             entity.Property(e => e.ProductId).HasColumnName("ProductID");
 
-            entity.HasOne(d => d.Payment).WithMany()
+            entity.HasOne(d => d.Payment).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.PaymentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__paymentDe__Payme__2E1BDC42");
+                .HasConstraintName("FK__PaymentDe__Payme__37A5467C");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__paymentDe__Produ__2D27B809");
+                .HasConstraintName("FK__PaymentDe__Produ__36B12243");
         });
 
         modelBuilder.Entity<Product>(entity =>

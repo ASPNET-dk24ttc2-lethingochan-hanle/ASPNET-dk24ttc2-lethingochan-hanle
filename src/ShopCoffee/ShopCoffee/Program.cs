@@ -33,9 +33,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         option.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
 
-
-
-builder.Services.AddDbContext<ShopCoffeeContext>(option =>
+builder.Services.AddDbContext<CoffeeShopContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("CoffeeShop"));
 });

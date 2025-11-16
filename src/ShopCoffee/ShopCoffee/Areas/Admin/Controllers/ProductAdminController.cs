@@ -21,9 +21,9 @@ namespace ShopCoffee.Areas.Admin.Controllers
     [Role("Administrator")]
     public class ProductAdminController : Controller
     {
-        private readonly ShopCoffeeContext _context;
+        private readonly CoffeeShopContext _context;
 
-        public ProductAdminController(ShopCoffeeContext context)
+        public ProductAdminController(CoffeeShopContext context)
         {
             _context = context;
         }

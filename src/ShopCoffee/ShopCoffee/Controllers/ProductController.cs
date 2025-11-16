@@ -7,9 +7,9 @@ namespace ShopCoffee.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ShopCoffeeContext _context;
+        private readonly CoffeeShopContext _context;
 
-        public ProductController(ShopCoffeeContext context)
+        public ProductController(CoffeeShopContext context)
         {
             _context = context;
         }

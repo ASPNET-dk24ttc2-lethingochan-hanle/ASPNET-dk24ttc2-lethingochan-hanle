@@ -265,6 +265,16 @@
         }
     </script>
 
+    <script>
+        // ------------- Auto Close Alert ----------------
+        const alert_error = document.getElementById("alert_message")
+        window.setTimeout(function () {
+            $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                $(this).remove();
+            });
+        }, 2000);
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
