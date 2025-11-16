@@ -65,11 +65,12 @@
 
                     <!-- Menu Profile -->
                     <div class="d-flex mt-5 justify-content-center">
-                        <a href="#" class="btn btn-outline-primary" style="margin-right: 20px">
+                        <a asp-controller="Customer" asp-action="ForgotPassword"
+                           class="btn btn-outline-primary" style="margin-right: 20px">
                             <label style="font-size: 16px">Đổi mật khẩu</label>
                         </a>
-                        <a asp-controller="Payment" asp-action="Index" asp-route-id="@Context.Session?.GetInt32("CustomerId")" 
-                            class="btn btn-outline-info"><label>Hóa đơn</label></a>
+                        <a asp-controller="Payment" asp-action="Index" asp-route-id="@Context.Session?.GetInt32("CustomerId")"
+                           class="btn btn-outline-info"><label>Hóa đơn</label></a>
                     </div>
                 </div>
 

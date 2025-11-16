@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ShopCoffee.Database;
 using ShopCoffee.Helper;
 using ShopCoffee.Models;
@@ -13,10 +14,12 @@ namespace ShopCoffee.Controllers
     public class CustomerController : Controller
     {
         private readonly CoffeeShopContext _context;
+        private readonly MailHelper _mailHelper;
 
-        public CustomerController(CoffeeShopContext context)
+        public CustomerController(CoffeeShopContext context, MailHelper mailHelper)
         {
             _context = context;
+            _mailHelper = mailHelper;
         }
 
         [HttpGet]
@@ -104,19 +107,29 @@ namespace ShopCoffee.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateDetailCustomer(Customer model, IFormFile? ImgUpload)
         {
-            if (ImgUpload != null)
+            try
             {
-                model.Img = await FileHelper.SaveImageAsync(ImgUpload, "customer");
-            }
-            else
-            {
-                model.Img ??= Url.Content("~/images/placeholder.png");
-            }
+                if (ImgUpload != null)
+                {
+                    model.Img = await FileHelper.SaveImageAsync(ImgUpload, "customer");
+                }
+                else
+                {
+                    model.Img ??= Url.Content("~/images/placeholder.png");
+                }
 
-            model.UpdateAt = DateTime.Now;
-            _context.Update(model);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Profile));
+                model.UpdateAt = DateTime.Now;
+                _context.Update(model);
+                await _context.SaveChangesAsync();
+                TempData["ProfileSuccessMessage"] = "Cập nhật thông tin thành công";
+                return RedirectToAction(nameof(Profile));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                TempData["ProfileErrorMessage"] = ex.Message;
+                return RedirectToAction("Profile");
+            }
         }
 
 
@@ -126,5 +139,137 @@ namespace ShopCoffee.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
+
+        #region FORGOT_PASSWORD
+        public IActionResult ForgotPassword()
+        {
+            //Random 1 chuỗi 6 số ngẫu nhiên
+            string randomString = "";
+            var rd = new Random();
+            for (int i = 0; i < 6; i++)
+            {
+                randomString = randomString + rd.Next(0, 10).ToString();
+            }
+
+            // tạo Model lưu chuỗi random
+            CustomerForgotPassword customer = new CustomerForgotPassword();
+            customer.RandomCode = randomString;
+
+
+            return View(customer);
+        }
+
+        [HttpPost]
+        public IActionResult ForgotPassword(CustomerForgotPassword customerForgot)
+        {
+            if (customerForgot.RandomCode != customerForgot.OTP)
+            {
+                return View();
+            }
+            CustomerNewPassword customer = new CustomerNewPassword();
+            customer.Email = customerForgot.Email;
+
+            return RedirectToAction("ResetPassword", customer);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotCheckEmailExist(string email, string otp)
+        {
+            //Nếu Email Null
+            if (email == null)
+            {
+                return Json("Vui lòng nhập email");
+            }
+
+            //Nếu không tim thấy tài khoản nào sử dụng email đã nhập
+            Customer? customerCheckMail = await _context.Customers.FirstOrDefaultAsync(p => p.Email == email);
+            if (customerCheckMail == null)
+            {
+                return Json("Không tìm thấy Email");
+            }
+
+            //nếu tìm thấy
+            //Gửi Email đã OTP
+
+            string titleMail = "XÁC THỰC PHIÊN GIAO DỊCH ";
+            string OTPHtml = otp;
+
+            string body = _mailHelper.PopulateBody(OTPHtml);
+            _mailHelper.SendHtmlFormattedEmail(email, titleMail, body);
+
+            return Json("OK");
+        }
+
+        #endregion
+
+        #region Reset_NewPassword
+
+        public IActionResult ResetPassword(CustomerNewPassword customerNewPassword)
+        {
+            return View(customerNewPassword);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordPost(CustomerNewPassword customerNewPassword)
+        {
+            try
+            {
+                //Password và Confirm Password khác nhau
+                if (customerNewPassword.NewPassWord != customerNewPassword.Confirm_NewPassWord)
+                {
+                    TempData["ResetPasswordErrorMessage"] = "Vui lòng mật khẩu giống nhau";
+                    return RedirectToAction("ResetPassword", customerNewPassword);
+                }
+
+                //Kiểm tra Email đã được đăng ký tài khoản hay chưa
+                Customer? customerExist = await _context.Customers.FirstOrDefaultAsync(p => p.Email == customerNewPassword.Email);
+                if (customerExist == null)
+                {
+                    TempData["SignUpErrorMessage"] = "Email chưa được đăng ký";
+                    return View();
+                }
+
+                //HashPassword
+                customerNewPassword.RandomKey = PasswordHelper.GenerateRandomKey();
+                customerNewPassword.NewPassWord = customerNewPassword.NewPassWord.ToMd5Hash(customerNewPassword.RandomKey);
+
+                customerExist.RandomKey = customerNewPassword.RandomKey;
+                customerExist.Password = customerNewPassword.NewPassWord;
+
+                _context.Update(customerExist);
+                await _context.SaveChangesAsync();
+
+                //// Kiểm tra truy vấn SQL thành công hay không?
+                //if (isSuccess)
+                //{
+                //    // Truy vấn Thành công
+                //    Console.WriteLine("Update Password Success");
+                //    if (HttpContext.User.FindFirstValue("CustomerId") == null)
+                //    {
+                //        TempData["SignInSuccessMessage"] = "Cấp lại mật khẩu thành công";
+                //        return RedirectToAction("SignIn");
+                //    }
+                TempData["ProfileSuccessMessage"] = "Cấp lại mật khẩu thành công";
+                return RedirectToAction("Profile");
+                //}
+                //else
+                //{
+                //    // Truy vấn Thất bại
+                //    Console.WriteLine("Update Customer Fail");
+                //    TempData["SignInSuccessMessage"] = "Lỗi hệ thống";
+                //    return RedirectToAction("SignIn");
+                //}
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                TempData["ResetPasswordErrorMessage"] = ex.Message;
+                return RedirectToAction("ResetPassword");
+            }
+        }
+
+        #endregion
+
+
     }
 }
