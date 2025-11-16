@@ -42,8 +42,11 @@
                 <span asp-validation-for="Img" class="text-danger"></span>
             </div> *@
             <div class="form-group">
+                <input type="hidden" asp-for="Img" />
+                <input type="hidden" asp-for="CustomerId" />
                 <label asp-for="Img" class="form-label fw-semibold">Ảnh đại diện</label>
                 <input asp-for="Img" type="file" accept="image/*" class="form-control" id="imgInput" />
+                <input type="text" asp-for="Img" style="display:none" />
                 <span asp-validation-for="Img" class="text-danger"></span>
 
                 <div class="mt-2 text-center">

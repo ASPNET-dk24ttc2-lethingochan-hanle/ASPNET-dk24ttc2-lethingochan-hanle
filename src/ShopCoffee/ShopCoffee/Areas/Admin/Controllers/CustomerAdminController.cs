@@ -112,7 +112,7 @@ namespace ShopCoffee.Areas.Admin.Controllers
             }
             else
             {
-                model.Img = Url.Content("~/images/placeholder.png");
+                model.Img ??= Url.Content("~/images/placeholder.png");
             }
 
             if (model.Password != null)

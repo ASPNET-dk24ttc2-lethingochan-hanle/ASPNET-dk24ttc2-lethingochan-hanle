@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using ShopCoffee.Database;
 using ShopCoffee.Helper;
 using ShopCoffee.Models;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -139,6 +141,76 @@ namespace ShopCoffee.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
+
+
+        #region SIGN_UP
+        // ------------------ SIGN UP --------------------
+        public IActionResult SignUp()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SignUp(Customer customerSignUp, IFormFile ImgUpload)
+        {
+            try
+            {
+                //Kiểm tra Email đã được đăng ký tài khoản hay chưa
+                Customer? customerExist = await _context.Customers.FirstOrDefaultAsync(p => p.Email == customerSignUp.Email);
+
+                if (customerExist != null)
+                {
+                    TempData["SignUpErrorMessage"] = "Email đã được đăng ký cho tài khoản khác";
+                    return View();
+                }
+
+                // RegisterAt va UpdateAt được lấy tự động theo giờ hệ thống
+                DateTime now = DateTime.Now;
+
+                customerSignUp.RegisteredAt = now;
+                customerSignUp.UpdateAt = now;
+
+                //Nếu có hình ảnh được Upload
+                if (ImgUpload != null)
+                {
+                    //Upload Hinh
+                    var ImageName = await FileHelper.SaveImageAsync(ImgUpload, "customer");
+                    customerSignUp.Img = ImageName;
+                }
+                else
+                {
+                    //Sử dụng avatar mặc định của project
+                    customerSignUp.Img = "avatar-default.jpg";
+                }
+
+                //kiểm tra Address có null hay không
+                if (customerSignUp.Address == null)
+                {
+                    customerSignUp.Address = "";
+                }
+
+                //HashPassword
+                customerSignUp.RandomKey = PasswordHelper.GenerateRandomKey();
+                customerSignUp.Password = customerSignUp.Password?.ToMd5Hash(customerSignUp.RandomKey);
+                customerSignUp.Role = 1;
+                customerSignUp.IsActive = true;
+
+
+                await _context.Customers.AddAsync(customerSignUp);
+                await _context.SaveChangesAsync();
+
+                TempData["SignInSuccessMessage"] = "Đăng ký thành công";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return View();
+            }
+        }
+        #endregion
+
+
 
         #region FORGOT_PASSWORD
         public IActionResult ForgotPassword()
