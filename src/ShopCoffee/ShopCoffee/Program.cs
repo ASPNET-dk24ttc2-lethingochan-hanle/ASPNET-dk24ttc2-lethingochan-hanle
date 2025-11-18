@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromDays(7);    // Thời gian session hết hạn
+    options.IdleTimeout = TimeSpan.FromDays(10);    // Thời gian session hết hạn
     options.Cookie.HttpOnly = true;                 // Chỉ server mới truy cập cookie
     options.Cookie.IsEssential = true;              // Bắt buộc, tránh bị chặn bởi GDPR
 });
@@ -47,7 +47,7 @@ builder.Services.AddDbContext<CoffeeShopContext>(option =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.IdleTimeout = TimeSpan.FromDays(10);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
