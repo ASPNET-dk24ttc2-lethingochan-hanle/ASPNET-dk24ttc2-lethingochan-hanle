@@ -226,7 +226,7 @@ sup {
 }
 
 a {
-    color: #81c408;
+    color: #4e73df;
     text-decoration: none
 }
 
@@ -2945,8 +2945,8 @@ textarea.form-control-lg {
 
 .btn-primary {
     color: #000;
-    background-color: #81c408;
-    border-color: #81c408
+    background-color: #4e73df;
+    border-color: #4e73df
 }
 
     .btn-primary:hover {
@@ -6837,7 +6837,7 @@ textarea.form-control-lg {
 }
 
 .border-primary {
-    border-color: #81c408 !important
+    border-color: #4e73df !important
 }
 
 .border-secondary {
@@ -7814,7 +7814,8 @@ textarea.form-control-lg {
 }
 
 .text-primary {
-    color: #81c408 !important
+    /*    color: #81c408 !important*/
+    color: #4e73df !important
 }
 
 .text-secondary {
@@ -7870,7 +7871,8 @@ textarea.form-control-lg {
 }
 
 .bg-primary {
-    background-color: #81c408 !important
+    /*    background-color: #81c408 !important*/
+    background-color: #4e73df !important
 }
 
 .bg-secondary {

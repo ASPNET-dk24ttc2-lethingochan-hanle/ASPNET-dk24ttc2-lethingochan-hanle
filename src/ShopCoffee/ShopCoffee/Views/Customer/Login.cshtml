@@ -15,7 +15,7 @@
         </div>
     </div>
 } *@
-<div>
+<div class="mt-5">
     @* @if (!string.IsNullOrWhiteSpace(TempData["ErrorMessage"]?.ToString()))
     {
         <div class="w-100 d-flex justify-content-end">
@@ -59,8 +59,8 @@
                     <a asp-controller="Customer" asp-action="ForgotPassword" class="small text-decoration-none">Quên mật khẩu?</a>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fa fa-sign-in-alt"></i> Đăng nhập
+                <button type="submit" class="btn btn-primary w-100 text-white ">
+                    <i class="fa fa-sign-in-alt "></i> Đăng nhập
                 </button>
 
                 @if (!string.IsNullOrWhiteSpace(TempData["ErrorMessage"]?.ToString()))
